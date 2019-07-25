@@ -8,7 +8,7 @@
 
 import Foundation
 
-class dataItem{
+class dataItem: Codable{
     var title: String = ""
     var done : Bool = false
 }

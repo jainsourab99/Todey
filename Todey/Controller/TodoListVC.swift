@@ -11,20 +11,17 @@ import UIKit
 class TodoListVC: UITableViewController {
     
     var item = [dataItem]()
-    let defaults = UserDefaults.standard
+     let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
 
     override func viewDidLoad() {
         super.viewDidLoad()
 //        if let items = defaults.array(forKey: "item") as? [String] {
 //            item = items
 //        }
-        let newItem = dataItem()
-        newItem.title = "Find Mike"
-        newItem.done = true
-        item.append(newItem)
-        if let items = defaults.array(forKey: "item") as? [dataItem]{
-            item = items
-        }
+        loadItem()
+        
+        print(dataFilePath ?? "")
+
         
     }
     
@@ -56,8 +53,7 @@ class TodoListVC: UITableViewController {
         
 //        tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
         item[indexPath.row].done = !item[indexPath.row].done
-     
-        tableView.reloadData()
+        saveItems()
         
 //        if(tableView.cellForRow(at: indexPath)?.accessoryType == .checkmark){
 //            tableView.cellForRow(at: indexPath)?.accessoryType = .none
@@ -85,9 +81,7 @@ class TodoListVC: UITableViewController {
             
             self.item.append(newItem)
             
-            self.defaults.setValue(self.item, forKey: "item")
-            
-            self.tableView.reloadData()
+           self.saveItems()
         }
         alert.addTextField { (alertTextField) in
             alertTextField.placeholder = "Create New Item"
@@ -98,6 +92,30 @@ class TodoListVC: UITableViewController {
         present(alert,animated: true,completion: nil)
     }
     
+    //MARK:- Model Manupulation Methods
+    
+    func saveItems(){
+        let encoder = PropertyListEncoder()
+        
+        do{
+            let data = try encoder.encode(item)
+            try data.write(to: dataFilePath!)
+        } catch {
+            print(error.localizedDescription)
+        }
+        self.tableView.reloadData()
+    }
+    func loadItem(){
+        
+        if let data = try? Data(contentsOf: dataFilePath!){
+            let decoder = PropertyListDecoder()
+            do{
+            item =  try decoder.decode([dataItem].self, from: data)
+            } catch {
+                print(error.localizedDescription)
+            }
+        }
+    }
     
 
 }
