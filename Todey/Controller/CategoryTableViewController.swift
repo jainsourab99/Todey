@@ -8,8 +8,11 @@
 
 import UIKit
 import CoreData
+import RealmSwift
 
 class CategoryTableViewController: UITableViewController {
+    
+    let realm = try! Realm()
     
     
     var categoryItem = [Category]()
@@ -18,7 +21,7 @@ class CategoryTableViewController: UITableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.loadItem()
+//        self.loadItem()
     }
 
     // MARK: - Table view data source
@@ -49,10 +52,12 @@ class CategoryTableViewController: UITableViewController {
         let alert = UIAlertController(title: "Add New Category", message: "", preferredStyle: .alert)
         
         let alertAction = UIAlertAction(title: "Add item", style: .default) { (action) in
-            let newItem = Category(context: self.context)
-            newItem.name = textField.text
+            
+            let newItem = Category()
+            newItem.name = textField.text!
             self.categoryItem.append(newItem)
-            self.saveItems()
+            self.saveItems(category: newItem)
+            
         }
         alert.addTextField { (alertTextField) in
             alertTextField.placeholder = "Add New Category"
@@ -64,26 +69,28 @@ class CategoryTableViewController: UITableViewController {
     
     //MARK:- Model Manupulation Methods
     
-    func saveItems(){
+    func saveItems(category: Category){
         
         do{
-            try context.save()
+            try realm.write {
+                realm.add(category)
+            }
         } catch {
             print("Error saving context \(error)")
         }
         self.tableView.reloadData()
     }
-    
-    func loadItem(with request: NSFetchRequest<Category> = Category.fetchRequest()){
-        
-        //        let request: NSFetchRequest<Item> = Item.fetchRequest()
-        do{
-            categoryItem =  try context.fetch(request)
-        } catch {
-            print("\(error)")
-        }
-        tableView.reloadData()
-    }
+//
+//    func loadItem(with request: NSFetchRequest<Category> = Category.fetchRequest()){
+//
+//        //        let request: NSFetchRequest<Item> = Item.fetchRequest()
+//        do{
+//            categoryItem =  try context.fetch(request)
+//        } catch {
+//            print("\(error)")
+//        }
+//        tableView.reloadData()
+//    }
     
     
     // MARK:- Table View Delegate Methods
